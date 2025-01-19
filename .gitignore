@@ -157,6 +157,8 @@ cython_debug/
 # project
 /backend/db_vectorial/*
 /backend/binaries_files/*
+!/backend/db_vectorial/.gitkeep
+!/backend/binaries_files/.gitkeep
 /backend.egg-info
 /ollama/models/
 /ollama/id_ed25519
