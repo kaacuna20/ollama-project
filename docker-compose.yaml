@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+
+  frontend:
+      container_name: frontend
+      build:
+        context: ./frontend
+      ports:
+        - "8501:8501"
+      working_dir: /app
+      volumes:
+        - ./frontend:/app
+      depends_on:
+        - backend
+      networks:
+        - app_network
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"  
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - ollama
+      #- nvidia
+    networks:
+      - app_network
+
+#### configuracion de ollama sin gpu ####
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama:/root/.ollama 
+    networks:
+      - app_network
+
+#### configuracion en caso de que tengas tarjeta gráfica nvidia ####
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ./ollama:/root/.ollama 
+  #    deploy:
+  #          resources:
+  #            reservations:
+  #              devices:
+  #                - driver: bridge
+  #                  capabilities: [gpu]
+  #   networks:
+  #     - app_network
+
+  # nvidia:
+  #   image: nvidia/cuda:12.3.1-base-ubuntu20.04
+  #   command: nvidia-smi
+  #   networks:
+  #     - app_network
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: bridge
+  #             count: 1
+  #             capabilities: [gpu]
+
+volumes:
+  ollama:  # Volumen persistente para los datos de Ollama
+  backend:
+  frontend:
+  #db_vectorial:
+
+networks:
+  app_network:
+    driver: bridge
+
