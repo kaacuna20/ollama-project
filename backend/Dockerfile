@@ -1,6 +1,8 @@
 # Usa una imagen base de Python 3.11
 FROM python:3.11-slim
 
+WORKDIR /app
+
 # Actualizar el sistema e instalar dependencias
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -27,9 +29,7 @@ RUN pip install --upgrade pip
 # Instala las dependencias del archivo requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Asegúrate de tener la última versión de pip, setuptools y wheel
-#RUN python -m pip install --upgrade pip setuptools wheel
-
+COPY . /app/
 
 EXPOSE 8000
 

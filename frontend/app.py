@@ -50,6 +50,7 @@ if "vectore" not in st.session_state:
     st.session_state.vectore = None
 
 path_files = [file['FileName'] for file in response.json()["learning-documents"]]
+files_format = {file['FileName']: file['format'] for file in response.json()["learning-documents"]}
         
 with st.form('parametros con Ollama'):
     files_select = st.selectbox("Escoge el documento", options=path_files)
@@ -62,7 +63,7 @@ with st.form('parametros con Ollama'):
             st.session_state.vectore = files_select
 
         print(st.session_state.vectore)
-        st.success("Modelo cargado con información de aprendizaje!")
+        st.success(f"Modelo cargado con información de aprendizaje de {st.session_state.vectore}!")
     
 
 # Display chat messages from history on app rerun
@@ -82,15 +83,24 @@ if user_input := st.chat_input("Escribí tu mensaje 😎"):
 if user_input != None:
     if st.session_state.messages and user_input.strip() != "":
         # Serializar el objeto vectore
-        vector_selected = st.session_state.vectore
-      
+        vector_selected = f"{st.session_state.vectore}-{files_format[st.session_state.vectore]}"
+        print(vector_selected)
+
         # Enviar a la API usando POST
-        response = requests.post(
+        response_prompt = requests.post(
             "http://backend:8000/llm/promp-user/",
-            data={"vectore_store_name": vector_selected, "user_input": user_input}
+            json={
+                "vectore_store_name": vector_selected,
+                "user_input": user_input
+                }
         )
+        print(response_prompt.json)
+        if response_prompt.status_code != 200:
             
-        response_llm = response.json()["llm_response"]
+            st.error("Error al procesar la solicitud. Intente de nuevo.")
+            st.stop()
+            
+        response_llm = response_prompt.json()["llm_response"]
         
         def stream_data():
             for word in response_llm.split(" "):
